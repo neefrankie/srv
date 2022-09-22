@@ -1,5 +1,8 @@
 package com.github.neefrankie.srv;
 
+import com.github.neefrankie.srv.connector.http.HttpRequest;
+import com.github.neefrankie.srv.connector.http.HttpResponse;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -41,7 +44,7 @@ public class HttpServer {
 
                 System.out.println("Parsing request...");
 
-                Request request = new Request(input);
+                HttpRequest request = new HttpRequest(input);
                 request.parse();
 
                 String reqUri = request.getUri();
@@ -50,7 +53,7 @@ public class HttpServer {
 
                 System.out.println("Preparing response...");
 
-                Response response = new Response(output);
+                HttpResponse response = new HttpResponse(output);
                 response.setRequest(request);
 
                 if (reqUri.startsWith("/servlet/")) {
