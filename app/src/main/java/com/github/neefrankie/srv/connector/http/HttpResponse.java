@@ -1,23 +1,66 @@
-package com.github.neefrankie.srv;
+package com.github.neefrankie.srv.connector.http;
 
+import com.github.neefrankie.srv.Constants;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.ServletResponse;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 
-public class Response implements ServletResponse {
+public class HttpResponse implements ServletResponse {
     private static final int BUFFER_SIZE = 1024;
-    Request request;
+    HttpRequest request;
     OutputStream output;
     PrintWriter writer;
+    protected byte[] buffer = new byte[BUFFER_SIZE];
+    protected int bufferCount = 0;
 
-    public Response(OutputStream output) {
+    // Has this response been committed yet?
+    protected boolean committed = false;
+    // The actual number of bytes written to this Response
+    protected int contentCount = 0;
+    // The content length associated with this Response
+    protected int contentLength = -1;
+    // The content type associated with this Response
+    protected String contentType = null;
+
+    protected HashMap<String, ArrayList<String>> headers = new HashMap<>();
+
+    public HttpResponse(OutputStream output) {
         this.output = output;
     }
 
-    public void setRequest(Request request) {
+    public void setRequest(HttpRequest request) {
         this.request = request;
+    }
+
+    public void setHeader(String name, String value) {
+        if (isCommitted()) {
+            return;
+        }
+
+        ArrayList<String> values = new ArrayList<>();
+        values.add(value);
+        synchronized (headers) {
+            headers.put(name, values);
+        }
+
+        String match = name.toLowerCase();
+        if (match.equals("content-length")) {
+            int contentLength = -1;
+            try {
+                contentLength = Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+
+            }
+            if (contentLength >= 0) {
+                setContentLength(contentLength);
+            }
+        } else if (match.equals("content-type")) {
+            setContentType(value);
+        }
     }
 
     public void sendStaticResource() throws IOException {
@@ -68,7 +111,7 @@ public class Response implements ServletResponse {
 
     @Override
     public String getContentType() {
-        return null;
+        return contentType;
     }
 
     @Override
@@ -92,7 +135,11 @@ public class Response implements ServletResponse {
 
     @Override
     public void setContentLength(int len) {
+        if (isCommitted()) {
+            return;
+        }
 
+        this.contentLength = len;
     }
 
     @Override
@@ -127,7 +174,7 @@ public class Response implements ServletResponse {
 
     @Override
     public boolean isCommitted() {
-        return false;
+        return committed;
     }
 
     @Override

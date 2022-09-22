@@ -1,4 +1,4 @@
-package com.github.neefrankie.srv;
+package com.github.neefrankie.srv.connector.http;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.ServletResponse;
@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
 
-public class ResponseFacade implements ServletResponse {
+public class HttpResponseFacade implements ServletResponse {
     private ServletResponse response = null;
 
-    public ResponseFacade(Response response) {
+    public HttpResponseFacade(HttpResponse response) {
         this.response = response;
     }
 
