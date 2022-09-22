@@ -1,5 +1,9 @@
 package com.github.neefrankie.srv;
 
+import com.github.neefrankie.srv.connector.http.HttpRequest;
+import com.github.neefrankie.srv.connector.http.HttpRequestFacade;
+import com.github.neefrankie.srv.connector.http.HttpResponse;
+import com.github.neefrankie.srv.connector.http.HttpResponseFacade;
 import jakarta.servlet.Servlet;
 
 import java.io.File;
@@ -10,7 +14,7 @@ import java.net.URLStreamHandler;
 
 public class ServletProcessor {
 
-    public void process(Request req, Response res) {
+    public void process(HttpRequest req, HttpResponse res) {
         String uri = req.getUri();
         String servletName = uri.substring(uri.lastIndexOf("/") + 1);
         URLClassLoader loader = null;
@@ -36,8 +40,8 @@ public class ServletProcessor {
         }
 
         Servlet servlet = null;
-        RequestFacade requestFacade = new RequestFacade(req);
-        ResponseFacade responseFacade = new ResponseFacade(res);
+        HttpRequestFacade requestFacade = new HttpRequestFacade(req);
+        HttpResponseFacade responseFacade = new HttpResponseFacade(res);
 
         try {
             servlet = (Servlet) myClass.newInstance();
