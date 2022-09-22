@@ -1,5 +1,6 @@
-package com.github.neefrankie.srv;
+package com.github.neefrankie.srv.connector.http;
 
+import com.github.neefrankie.srv.util.Enumerator;
 import jakarta.servlet.*;
 
 import javax.annotation.Nullable;
@@ -7,16 +8,40 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.Map;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.*;
 
-public class Request implements ServletRequest {
+public class HttpRequest implements ServletRequest {
 
+    private String contentType;
+    private int contentLength;
+    private InetAddress inetAddress;
     private InputStream input;
+    private String method;
+    private String protocol;
+    private String queryString;
+    private String requestURI;
+    private String serverName;
+    private int serverPort;
+    private Socket socket;
+    private boolean requestedSessionCookie;
+    private String requestedSessionId;
+    private boolean requestedSessionURL;
+
+    protected HashMap<String, Object> attributes = new HashMap<>();
+
+    protected String authorization = null;
+    protected String contextPath = "";
+    protected ArrayList<String> cookies = new ArrayList<>();
+    protected HashMap<String, ArrayList<String>> headers = new HashMap<>();
+
+    protected boolean parsed = false;
+    protected String pathInfo = null;
+
     private String uri;
 
-    public Request(InputStream input) {
+    public HttpRequest(InputStream input) {
         this.input = input;
     }
 
@@ -58,15 +83,83 @@ public class Request implements ServletRequest {
         uri = parseUri(request.toString());
     }
 
+    public void setContentLength(int length) {
+        this.contentLength = length;
+    }
 
+    public void setContentType(String type) {
+        this.contentType = type;
+    }
+
+    public void setInet(InetAddress inetAddress) {
+        this.inetAddress = inetAddress;
+    }
+
+    public void setContextPath(String path) {
+        if (path == null) {
+            this.contextPath = "";
+        } else {
+            this.contentType = path;
+        }
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public void setPathInfo(String path) {
+        this.pathInfo = path;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    public void setQueryString(String queryString) {
+        this.queryString = queryString;
+    }
+
+    public void setRequestURI(String requestURI) {
+        this.requestURI = requestURI;
+    }
+
+    public void setServerName(String name) {
+        this.serverName = name;
+    }
+
+    public void setServerPort(int port) {
+        this.serverPort = port;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
+    public void setRequestedSessionCookie(boolean flag) {
+        this.requestedSessionCookie = flag;
+    }
+
+    public void setRequestedSessionId(String requestedSessionId) {
+        this.requestedSessionId = requestedSessionId;
+    }
+
+    public void setRequestedSessionURL(boolean flag) {
+        requestedSessionURL = flag;
+    }
+
+    /* Implementation of the HttpServletRequest */
     @Override
     public Object getAttribute(String name) {
-        return null;
+        synchronized (attributes) {
+            return (attributes.get(name));
+        }
     }
 
     @Override
     public Enumeration<String> getAttributeNames() {
-        return null;
+        synchronized (attributes) {
+            return (new Enumerator<>(attributes.keySet()));
+        }
     }
 
     @Override
@@ -91,7 +184,7 @@ public class Request implements ServletRequest {
 
     @Override
     public String getContentType() {
-        return null;
+        return contentType;
     }
 
     @Override

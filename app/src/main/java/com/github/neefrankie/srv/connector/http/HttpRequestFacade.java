@@ -1,4 +1,4 @@
-package com.github.neefrankie.srv;
+package com.github.neefrankie.srv.connector.http;
 
 import jakarta.servlet.*;
 
@@ -9,10 +9,10 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 
-public class RequestFacade implements ServletRequest {
+public class HttpRequestFacade implements ServletRequest {
     private ServletRequest request = null;
 
-    public RequestFacade(Request request) {
+    public HttpRequestFacade(HttpRequest request) {
         this.request = request;
     }
 
